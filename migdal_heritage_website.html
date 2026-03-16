@@ -1,0 +1,2127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Migdal Heritage Project — Guardians of Magdala</title>
+  <meta name="description" content="Become a Guardian of Magdala. A verifiable, serialised custodianship of sacred land in Magdala, Israel — birthplace of Mary Magdalene. Connecting East Africa to their Abrahamic Biblical Heritage." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet for map -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+
+  <style>
+    /* ── Reset & Variables ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal:       #1B5E52;
+      --teal-dark:  #0F3D33;
+      --teal-deep:  #0A2820;
+      --teal-mid:   #2A7A69;
+      --teal-light: #3D9E8A;
+      --gold:       #C9A84C;
+      --gold-light: #E2C97E;
+      --gold-pale:  #F5EDCF;
+      --cream:      #FAF6EE;
+      --sand:       #EFE6D0;
+      --white:      #FFFFFF;
+      --text:       #1A1A1A;
+      --text-mid:   #3A3A3A;
+      --text-muted: #6B6B6B;
+
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'Jost', system-ui, sans-serif;
+
+      --max-w: 1160px;
+      --section-pad: 7rem 1.5rem;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--text);
+      background: var(--cream);
+      overflow-x: hidden;
+    }
+
+    img { display: block; max-width: 100%; }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Grain overlay ─────────────────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.35;
+    }
+
+    /* ── Typography helpers ────────────────────────────────────────────────── */
+    .display-xl {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7vw, 6.5rem);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.02em;
+    }
+    .display-lg {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 600;
+      line-height: 1.1;
+    }
+    .display-md {
+      font-family: var(--font-display);
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .eyebrow {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+    .body-lg  { font-size: 1.1rem; line-height: 1.75; font-weight: 300; }
+    .body-md  { font-size: 0.95rem; line-height: 1.7; }
+    .body-sm  { font-size: 0.82rem; line-height: 1.65; }
+
+    /* ── Layout helpers ────────────────────────────────────────────────────── */
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 1.5rem; }
+    .section   { padding: var(--section-pad); }
+
+    /* ── Gold rule ─────────────────────────────────────────────────────────── */
+    .gold-rule {
+      display: block;
+      width: 60px;
+      height: 2px;
+      background: var(--gold);
+      margin: 1.2rem 0;
+    }
+    .gold-rule.centered { margin: 1.2rem auto; }
+
+    /* ── Buttons ───────────────────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: var(--teal-deep);
+    }
+    .btn-gold:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(201,168,76,0.35);
+    }
+    .btn-outline-white {
+      background: transparent;
+      color: var(--white);
+      border: 1.5px solid rgba(255,255,255,0.6);
+    }
+    .btn-outline-white:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--white);
+    }
+    .btn-outline-teal {
+      background: transparent;
+      color: var(--teal);
+      border: 1.5px solid var(--teal);
+    }
+    .btn-outline-teal:hover {
+      background: var(--teal);
+      color: var(--white);
+    }
+    .btn-teal {
+      background: var(--teal);
+      color: var(--white);
+    }
+    .btn-teal:hover {
+      background: var(--teal-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(27,94,82,0.3);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* NAV                                                                     */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+    #nav.scrolled {
+      background: var(--teal-deep);
+      box-shadow: 0 2px 24px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .nav-logo-mark {
+      width: 36px;
+      height: 36px;
+      background: var(--gold);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--teal-deep);
+    }
+    .nav-logo-text {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--white);
+      letter-spacing: 0.03em;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--gold-light); }
+    .nav-cta {
+      padding: 0.5rem 1.2rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+    }
+    .nav-mobile-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .nav-mobile-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      transition: all 0.3s;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* HERO                                                                    */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      background: var(--teal-deep);
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to bottom,
+          rgba(10,40,32,0.55) 0%,
+          rgba(10,40,32,0.3) 40%,
+          rgba(10,40,32,0.75) 100%),
+        url('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Migdal_P1050882.JPG/1280px-Migdal_P1050882.JPG')
+        center center / cover no-repeat;
+    }
+    /* Animated shimmer on hero */
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(201,168,76,0.04) 50%, transparent 100%);
+      animation: shimmer 8s ease-in-out infinite alternate;
+    }
+    @keyframes shimmer {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 10rem 1.5rem 6rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: end;
+    }
+    .hero-left { animation: fadeUp 1s ease 0.2s both; }
+    .hero-right { animation: fadeUp 1s ease 0.5s both; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-eyebrow {
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+    .hero-title {
+      color: var(--white);
+      margin-bottom: 0.3rem;
+    }
+    .hero-title .accent {
+      color: var(--gold-light);
+      font-style: italic;
+    }
+    .hero-subtitle {
+      color: rgba(255,255,255,0.75);
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      font-style: italic;
+      margin: 1.2rem 0 2rem;
+      line-height: 1.5;
+    }
+    .hero-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    /* Right side stat cards */
+    .hero-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .hero-stat-card {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(201,168,76,0.25);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      transition: border-color 0.3s;
+    }
+    .hero-stat-card:hover { border-color: rgba(201,168,76,0.6); }
+    .hero-stat-num {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .hero-stat-label {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.4;
+    }
+
+    /* Scroll indicator */
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      animation: bounce 2s ease infinite;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(201,168,76,0.8), transparent);
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* DISCLAIMER BANNER                                                       */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #disclaimer-banner {
+      background: var(--teal-deep);
+      border-top: 2px solid var(--gold);
+      border-bottom: 2px solid var(--gold);
+      padding: 1.2rem 1.5rem;
+      text-align: center;
+    }
+    .disclaimer-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .disclaimer-badge {
+      background: var(--gold);
+      color: var(--teal-deep);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      white-space: nowrap;
+    }
+    .disclaimer-text {
+      font-size: 0.8rem;
+      color: var(--gold-light);
+      line-height: 1.5;
+    }
+    .disclaimer-text strong { color: var(--white); }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* STORY SECTION                                                           */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #story {
+      background: var(--cream);
+      padding: var(--section-pad);
+    }
+    .story-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .story-image-wrap {
+      position: relative;
+    }
+    .story-image-wrap img {
+      width: 100%;
+      aspect-ratio: 4/5;
+      object-fit: cover;
+      filter: sepia(0.15) contrast(1.05);
+    }
+    .story-image-accent {
+      position: absolute;
+      top: -1rem;
+      left: -1rem;
+      width: 80px;
+      height: 80px;
+      border: 2px solid var(--gold);
+      pointer-events: none;
+    }
+    .story-image-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(10,40,32,0.85));
+      padding: 2rem 1.2rem 1rem;
+      color: var(--gold-light);
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+    .story-text .eyebrow { color: var(--gold); }
+    .story-text .display-lg { color: var(--teal-dark); margin: 0.5rem 0; }
+    .story-text p {
+      color: var(--text-mid);
+      margin-bottom: 1.2rem;
+    }
+    .scripture-block {
+      border-left: 3px solid var(--gold);
+      padding: 1rem 1.5rem;
+      margin: 2rem 0;
+      background: var(--gold-pale);
+    }
+    .scripture-block p {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--teal-dark);
+      margin-bottom: 0.4rem !important;
+      line-height: 1.5;
+    }
+    .scripture-block cite {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      font-style: normal;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* Abrahamic heritage band */
+    .heritage-band {
+      background: var(--teal);
+      padding: 4rem 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .heritage-band::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
+    }
+    .heritage-band .eyebrow { color: var(--gold); margin-bottom: 1rem; }
+    .heritage-band .display-lg { color: var(--white); max-width: 700px; margin: 0 auto 1rem; }
+    .heritage-band p { color: rgba(255,255,255,0.72); max-width: 600px; margin: 0 auto; }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* GUARDIANSHIP SECTION                                                    */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #guardianship {
+      background: var(--white);
+      padding: var(--section-pad);
+    }
+    .section-header {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto 4rem;
+    }
+    .section-header .eyebrow { color: var(--gold); }
+    .section-header .display-lg { color: var(--teal-dark); margin: 0.5rem 0 1rem; }
+    .section-header p { color: var(--text-mid); }
+
+    /* vs. card */
+    .vs-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 2rem;
+      align-items: start;
+      margin-bottom: 4rem;
+    }
+    .vs-card {
+      padding: 2rem;
+      border: 1.5px solid;
+    }
+    .vs-card.is {
+      border-color: var(--gold);
+      background: var(--gold-pale);
+    }
+    .vs-card.is-not {
+      border-color: #ddd;
+      background: var(--cream);
+    }
+    .vs-card-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .vs-card.is .vs-card-label { color: var(--gold); }
+    .vs-card.is-not .vs-card-label { color: var(--text-muted); }
+
+    .vs-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.9rem;
+    }
+    .vs-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      margin-top: 2px;
+    }
+    .vs-card.is .vs-icon { background: var(--gold); color: var(--teal-deep); }
+    .vs-card.is-not .vs-icon { background: #e0e0e0; color: #888; }
+    .vs-item p { font-size: 0.88rem; color: var(--text-mid); line-height: 1.5; }
+
+    .vs-divider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 3rem;
+      gap: 0.5rem;
+    }
+    .vs-divider-line { width: 1px; height: 40px; background: var(--gold); }
+    .vs-divider-text {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    /* Kit components */
+    .kit-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .kit-card {
+      position: relative;
+      padding: 2rem;
+      background: var(--cream);
+      border-top: 3px solid var(--gold);
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+    .kit-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(27,94,82,0.12);
+    }
+    .kit-num {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 700;
+      color: rgba(201,168,76,0.25);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .kit-timing {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal-mid);
+      margin-bottom: 0.8rem;
+    }
+    .kit-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--teal-dark);
+      margin-bottom: 0.7rem;
+    }
+    .kit-body { font-size: 0.88rem; color: var(--text-mid); line-height: 1.65; }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* THE TRUST                                                               */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #trust {
+      background: var(--teal-dark);
+      padding: var(--section-pad);
+      position: relative;
+      overflow: hidden;
+    }
+    #trust::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+    }
+    .trust-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .trust-left .eyebrow { color: var(--gold); }
+    .trust-left .display-lg { color: var(--white); margin: 0.5rem 0 1.5rem; }
+    .trust-left p { color: rgba(255,255,255,0.72); margin-bottom: 1rem; }
+    .trust-stat {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.2rem 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .trust-stat-num {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .trust-stat-label { font-size: 0.82rem; color: rgba(255,255,255,0.65); line-height: 1.4; }
+
+    .trust-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .trustee-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(201,168,76,0.2);
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .trustee-card:hover {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(255,255,255,0.08);
+    }
+    .trustee-icon {
+      width: 42px; height: 42px;
+      background: var(--gold);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 1.2rem;
+    }
+    .trustee-title { font-size: 0.82rem; font-weight: 600; color: var(--white); margin-bottom: 0.2rem; }
+    .trustee-desc { font-size: 0.75rem; color: rgba(255,255,255,0.55); line-height: 1.4; }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* ACQUIRE / PURCHASE                                                      */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #acquire {
+      background: var(--cream);
+      padding: var(--section-pad);
+    }
+    .price-hero {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--teal-deep);
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .price-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center top, rgba(201,168,76,0.1) 0%, transparent 60%);
+    }
+    .price-hero .eyebrow { color: var(--gold); margin-bottom: 1rem; }
+    .price-main {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+    .price-sub {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      color: rgba(255,255,255,0.55);
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .price-hero p { color: rgba(255,255,255,0.65); max-width: 500px; margin: 0 auto; font-size: 0.88rem; }
+
+    .purchase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .purchase-channel {
+      background: var(--white);
+      border: 1.5px solid var(--sand);
+      padding: 2.5rem;
+      position: relative;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .purchase-channel:hover {
+      border-color: var(--gold);
+      box-shadow: 0 8px 32px rgba(201,168,76,0.12);
+    }
+    .purchase-channel.featured {
+      border-color: var(--gold);
+      background: var(--gold-pale);
+    }
+    .featured-badge {
+      position: absolute;
+      top: -1px; right: 1.5rem;
+      background: var(--gold);
+      color: var(--teal-deep);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+    }
+    .channel-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .channel-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--teal-dark);
+      margin-bottom: 0.5rem;
+    }
+    .channel-desc { font-size: 0.88rem; color: var(--text-mid); margin-bottom: 1.5rem; line-height: 1.65; }
+    .channel-steps { list-style: none; margin-bottom: 1.8rem; }
+    .channel-steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+      font-size: 0.83rem;
+      color: var(--text-mid);
+    }
+    .step-num {
+      width: 20px; height: 20px;
+      background: var(--teal);
+      color: var(--white);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Online purchase form placeholder */
+    .online-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .form-field label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+    }
+    .form-field input, .form-field select {
+      padding: 0.7rem 0.9rem;
+      border: 1.5px solid var(--sand);
+      background: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--text);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    .form-field input:focus, .form-field select:focus {
+      border-color: var(--teal);
+    }
+    .mpesa-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #00A651;
+      color: white;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* VERIFY SECTION                                                          */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #verify {
+      background: var(--teal-dark);
+      padding: var(--section-pad);
+      position: relative;
+    }
+    .verify-header {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+    }
+    .verify-header .eyebrow { color: var(--gold); }
+    .verify-header .display-lg { color: var(--white); margin: 0.5rem 0 1rem; }
+    .verify-header p { color: rgba(255,255,255,0.65); }
+
+    .verify-box {
+      max-width: 680px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 2.5rem;
+    }
+    .serial-input-row {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0.75rem;
+    }
+    .serial-prefix {
+      background: var(--gold);
+      color: var(--teal-deep);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      padding: 0 1rem;
+      display: grid;
+      place-items: center;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #serial-input {
+      flex: 1;
+      padding: 0.9rem 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-left: none;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    #serial-input::placeholder { color: rgba(255,255,255,0.3); letter-spacing: 0.05em; }
+    #serial-input:focus {
+      border-color: var(--gold);
+      background: rgba(255,255,255,0.12);
+    }
+    #serial-input.error { border-color: #e57373; }
+    #serial-error {
+      font-size: 0.78rem;
+      color: #e57373;
+      min-height: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+    #verify-btn {
+      width: 100%;
+      justify-content: center;
+      padding: 1rem;
+      font-size: 0.8rem;
+    }
+    #verify-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    /* Result panel */
+    #verify-result {
+      display: none;
+      margin-top: 2rem;
+      animation: fadeUp 0.5s ease both;
+    }
+    #verify-result.visible { display: block; }
+
+    .result-header {
+      background: var(--gold);
+      color: var(--teal-deep);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0;
+    }
+    .result-header-icon { font-size: 1.5rem; }
+    .result-header-text h4 { font-weight: 700; font-size: 0.9rem; }
+    .result-header-text p { font-size: 0.75rem; opacity: 0.75; }
+
+    .result-body {
+      background: rgba(255,255,255,0.97);
+      padding: 2rem;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .result-detail-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--teal-mid);
+      margin-bottom: 0.2rem;
+    }
+    .result-detail-value {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--teal-dark);
+    }
+
+    #map-container {
+      width: 100%;
+      height: 280px;
+      border: 2px solid var(--sand);
+      margin-bottom: 1.5rem;
+      position: relative;
+      background: #e8f0ec;
+    }
+    #guardianship-map { width: 100%; height: 100%; }
+
+    .map-overlay {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      background: rgba(10,40,32,0.85);
+      color: var(--gold-light);
+      font-size: 0.68rem;
+      padding: 0.4rem 0.7rem;
+      pointer-events: none;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Certificate preview */
+    #certificate-preview {
+      display: none;
+      margin-top: 1.5rem;
+    }
+    #certificate-preview.visible { display: block; }
+
+    .certificate {
+      background: var(--cream);
+      border: 2px solid var(--gold);
+      padding: 3rem;
+      position: relative;
+      text-align: center;
+      font-family: var(--font-display);
+    }
+    .cert-corner {
+      position: absolute;
+      width: 40px; height: 40px;
+      border-color: var(--gold);
+      border-style: solid;
+    }
+    .cert-corner.tl { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+    .cert-corner.tr { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+    .cert-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
+    .cert-corner.br { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
+    .cert-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-family: var(--font-body);
+      margin-bottom: 1rem;
+    }
+    .cert-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--teal-dark);
+      margin-bottom: 0.3rem;
+    }
+    .cert-subtitle {
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--teal-mid);
+      margin-bottom: 1.5rem;
+    }
+    .cert-divider {
+      width: 120px;
+      height: 1px;
+      background: var(--gold);
+      margin: 1rem auto;
+    }
+    .cert-body {
+      font-size: 1rem;
+      color: var(--text-mid);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto 1.5rem;
+    }
+    .cert-serial {
+      display: inline-block;
+      background: var(--teal-deep);
+      color: var(--gold-light);
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      padding: 0.5rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .cert-coords {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      letter-spacing: 0.06em;
+      margin-bottom: 1.5rem;
+    }
+    .cert-seal {
+      width: 70px;
+      height: 70px;
+      background: var(--teal-dark);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 1rem;
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      border: 3px solid var(--gold);
+    }
+    .cert-footer {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      letter-spacing: 0.05em;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* FAQ                                                                     */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #faq {
+      background: var(--cream);
+      padding: var(--section-pad);
+    }
+    .faq-list {
+      max-width: 740px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--sand);
+    }
+    .faq-q {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 0;
+      cursor: pointer;
+      gap: 1rem;
+    }
+    .faq-q h4 {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--teal-dark);
+    }
+    .faq-icon {
+      width: 24px; height: 24px;
+      border: 1.5px solid var(--gold);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 1rem;
+      color: var(--gold);
+      transition: transform 0.3s;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s;
+    }
+    .faq-item.open .faq-a { max-height: 400px; padding-bottom: 1.2rem; }
+    .faq-a p { font-size: 0.9rem; color: var(--text-mid); line-height: 1.7; }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* FINAL CTA                                                               */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #cta-final {
+      background: var(--teal-deep);
+      padding: 7rem 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    #cta-final::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 65%);
+    }
+    #cta-final .display-xl { color: var(--white); margin-bottom: 0.5rem; }
+    #cta-final .display-xl span { color: var(--gold-light); font-style: italic; }
+    #cta-final p { color: rgba(255,255,255,0.65); max-width: 520px; margin: 1rem auto 2.5rem; }
+    .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* FOOTER                                                                  */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    #footer {
+      background: #050f0c;
+      padding: 4rem 1.5rem 2rem;
+      color: rgba(255,255,255,0.5);
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+      max-width: var(--max-w);
+      margin: 0 auto 3rem;
+    }
+    .footer-brand p {
+      font-size: 0.82rem;
+      line-height: 1.7;
+      margin-top: 1rem;
+      max-width: 280px;
+    }
+    .footer-col h5 {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.6rem; }
+    .footer-col ul li a {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.5);
+      transition: color 0.2s;
+    }
+    .footer-col ul li a:hover { color: var(--gold-light); }
+
+    .footer-bottom {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .footer-legal {
+      font-size: 0.72rem;
+      line-height: 1.7;
+      max-width: 800px;
+      color: rgba(255,255,255,0.35);
+    }
+    .footer-legal strong { color: rgba(255,255,255,0.55); }
+
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    /* RESPONSIVE                                                              */
+    /* ═══════════════════════════════════════════════════════════════════════ */
+    @media (max-width: 900px) {
+      .hero-content { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-right { display: none; }
+      .story-grid { grid-template-columns: 1fr; }
+      .story-image-wrap { max-width: 500px; }
+      .vs-grid { grid-template-columns: 1fr; }
+      .vs-divider { flex-direction: row; padding: 0; }
+      .vs-divider-line { width: 40px; height: 1px; }
+      .kit-grid { grid-template-columns: 1fr; }
+      .trust-grid { grid-template-columns: 1fr; }
+      .purchase-grid { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .nav-mobile-toggle { display: flex; }
+    }
+
+    @media (max-width: 600px) {
+      :root { --section-pad: 4.5rem 1.2rem; }
+      .hero-content { padding: 8rem 1.2rem 5rem; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-btns { flex-direction: column; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    /* Mobile nav menu */
+    #mobile-menu {
+      display: none;
+      position: fixed;
+      top: 68px; left: 0; right: 0;
+      background: var(--teal-deep);
+      padding: 1.5rem;
+      z-index: 99;
+      flex-direction: column;
+      gap: 1rem;
+      border-top: 1px solid rgba(201,168,76,0.3);
+    }
+    #mobile-menu.open { display: flex; }
+    #mobile-menu a {
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════ NAV ═══════ -->
+  <nav id="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-mark">M</div>
+      <span class="nav-logo-text">Migdal Heritage</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#story">The Story</a></li>
+      <li><a href="#guardianship">Guardianship</a></li>
+      <li><a href="#trust">The Trust</a></li>
+      <li><a href="#acquire">Acquire</a></li>
+      <li><a href="#verify">Verify</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+    <a href="#acquire" class="btn btn-gold nav-cta">Become a Guardian</a>
+    <button class="nav-mobile-toggle" id="mobile-toggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobile-menu">
+    <a href="#story" onclick="closeMobile()">The Story</a>
+    <a href="#guardianship" onclick="closeMobile()">Guardianship</a>
+    <a href="#trust" onclick="closeMobile()">The Trust</a>
+    <a href="#acquire" onclick="closeMobile()">Acquire</a>
+    <a href="#verify" onclick="closeMobile()">Verify</a>
+    <a href="#faq" onclick="closeMobile()">FAQ</a>
+    <a href="#acquire" class="btn btn-gold" style="text-align:center;justify-content:center;" onclick="closeMobile()">Become a Guardian</a>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ HERO ══════ -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content container">
+      <div class="hero-left">
+        <p class="eyebrow hero-eyebrow">The Migdal Heritage Project</p>
+        <h1 class="display-xl hero-title">
+          Become a<br>
+          <span class="accent">Guardian</span><br>
+          of Magdala
+        </h1>
+        <p class="hero-subtitle">
+          Where Mary Magdalene was born — the first witness<br>
+          of the Resurrection of Jesus.
+        </p>
+        <div class="hero-btns">
+          <a href="#acquire" class="btn btn-gold">Become a Guardian</a>
+          <a href="#verify" class="btn btn-outline-white">Verify My Certificate</a>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-stats">
+          <div class="hero-stat-card">
+            <div class="hero-stat-num">200M+</div>
+            <div class="hero-stat-label">Devout Christians across East Africa for whom the Holy Land is a living inheritance</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-num">USD $25</div>
+            <div class="hero-stat-label">The price of a family meal. A lifetime custodial connection to sacred ground.</div>
+          </div>
+          <div class="hero-stat-card">
+            <div class="hero-stat-num">10%</div>
+            <div class="hero-stat-label">Of every purchase routed automatically to the Magdala Faithful Foundation for charitable works</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════ DISCLAIMER BANNER ══════ -->
+  <div id="disclaimer-banner">
+    <div class="disclaimer-inner">
+      <div class="disclaimer-badge">Important Notice</div>
+      <p class="disclaimer-text">
+        <strong>A Guardianship is a custodianship — not ownership.</strong>
+        The Migdal Heritage Project sells Symbolic Commemorative Guardianships only.
+        No real estate title, no investment return, and no property rights are transferred or implied.
+      </p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ STORY ═════ -->
+  <section id="story" class="section">
+    <div class="container">
+      <div class="story-grid">
+        <div class="story-image-wrap reveal">
+          <div class="story-image-accent"></div>
+          <img
+            src="magdala.jpg"
+            alt="The shores of Magdala on the Sea of Galilee"
+            onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Migdal_P1050882.JPG/800px-Migdal_P1050882.JPG'"
+          />
+          <div class="story-image-caption">The shores of Magdala — Sea of Galilee, Israel</div>
+        </div>
+        <div class="story-text reveal">
+          <p class="eyebrow">The Holy Land</p>
+          <span class="gold-rule"></span>
+          <h2 class="display-lg">Magdala.<br>A Place of Living History.</h2>
+          <p class="body-lg" style="margin-top:1rem;">
+            On the western shore of the Sea of Galilee, in the land where Jesus walked and preached, lies Magdala — birthplace of Mary Magdalene.
+          </p>
+          <p class="body-md" style="color:var(--text-mid); margin-top:1rem;">
+            Mary was healed by Jesus, stood faithfully at the foot of the Cross when others fled, and was chosen — above all the disciples — to be the first witness of the Resurrection. Her hometown carries the weight of that sacred history to this day.
+          </p>
+          <div class="scripture-block">
+            <p>"Mary!" — Jesus spoke her name, and she knew.</p>
+            <cite>John 20:16</cite>
+          </div>
+          <p class="body-md" style="color:var(--text-mid);">
+            Magdala is not a story from the past. It is living ground — and now, for the first time, East African believers can hold their own verifiable place within it.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Heritage Band -->
+  <div class="heritage-band reveal">
+    <div class="container">
+      <p class="eyebrow">Our Mission</p>
+      <h2 class="display-lg">Connecting East Africa to Their<br>Abrahamic Biblical Heritage</h2>
+      <span class="gold-rule centered"></span>
+      <p class="body-md">
+        For millions of East African Christians, the Holy Land is not a distant aspiration — it is the root of a living faith. The Migdal Heritage Project exists to make that connection real, tangible, and accessible to every believer, regardless of economic means.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ GUARDIANSHIP ═══════════ -->
+  <section id="guardianship" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <p class="eyebrow">Understanding Your Guardianship</p>
+        <span class="gold-rule centered"></span>
+        <h2 class="display-lg">What a Guardianship Is — and What It Isn't</h2>
+        <p class="body-md">Clarity and transparency are foundational to this project. Please read this carefully before you acquire a Guardianship.</p>
+      </div>
+
+      <div class="vs-grid reveal">
+        <div class="vs-card is">
+          <p class="vs-card-label">A Guardianship IS</p>
+          <div class="vs-item">
+            <div class="vs-icon">✓</div>
+            <p>A <strong>Licensed Custodial Certificate</strong> linking you irrevocably to a specific, verified 1 sq cm coordinate within the Magdala heritage site</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✓</div>
+            <p>A <strong>lifetime spiritual guardianship</strong> — a permanent commemorative right, not a transactional purchase</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✓</div>
+            <p>A <strong>premium physical artefact</strong> — a laser-etched K9 crystal block and gold-foil certificate, heirloom quality</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✓</div>
+            <p>A <strong>digitally verifiable</strong> claim — your serial number is searchable on the Magdala Global Registry</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✓</div>
+            <p>A contribution to <strong>charitable works in your community</strong> — 10% of your purchase goes directly to the Magdala Faithful Foundation</p>
+          </div>
+        </div>
+        <div class="vs-divider">
+          <div class="vs-divider-line"></div>
+          <div class="vs-divider-text">vs</div>
+          <div class="vs-divider-line"></div>
+        </div>
+        <div class="vs-card is-not">
+          <p class="vs-card-label">A Guardianship is NOT</p>
+          <div class="vs-item">
+            <div class="vs-icon">✗</div>
+            <p>A <strong>real estate title deed</strong> or conveyance of any property rights under Israeli, Kenyan, or any other law</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✗</div>
+            <p>An <strong>investment or financial instrument</strong> — it carries no promise of capital appreciation or financial return</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✗</div>
+            <p>A <strong>collective investment scheme</strong> — you are not purchasing a share in any fund, company, or land-buying enterprise</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✗</div>
+            <p>A <strong>charitable donation</strong> — you are acquiring a tangible product with a named commemorative value</p>
+          </div>
+          <div class="vs-item">
+            <div class="vs-icon">✗</div>
+            <p>A <strong>right of physical access</strong> — guardianship does not entitle the holder to enter or use the land</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- The Kit -->
+      <div class="section-header reveal" style="margin-top:5rem;">
+        <p class="eyebrow">The Guardianship Kit</p>
+        <span class="gold-rule centered"></span>
+        <h2 class="display-lg">Three Components. One Eternal Connection.</h2>
+      </div>
+      <div class="kit-grid reveal">
+        <div class="kit-card">
+          <div class="kit-num">01</div>
+          <div class="kit-timing">Immediate — at point of sale</div>
+          <div class="kit-title">Certificate of Guardianship</div>
+          <p class="kit-body">
+            A premium Certificate printed on 300gsm linen-textured stock with gold foil stamping, an embossed Trust seal, and your unique serialised plot number — MIG-XXXXXXXX. Your named, numbered claim to Magdala, issued the moment you pay.
+          </p>
+        </div>
+        <div class="kit-card">
+          <div class="kit-num">02</div>
+          <div class="kit-timing">Delivered within 28 days</div>
+          <div class="kit-title">The "Cornerstone" Crystal</div>
+          <p class="kit-body">
+            A K9 optical crystal block — 50×50×80mm — with the 3D topography of the Magdala site and your unique serial number laser-engraved inside the glass. Delivered in a velvet-lined presentation box. Heirloom quality. Designed for permanent display in your home.
+          </p>
+        </div>
+        <div class="kit-card">
+          <div class="kit-num">03</div>
+          <div class="kit-timing">Always-on digital access</div>
+          <div class="kit-title">Digital Registry Verification</div>
+          <p class="kit-body">
+            Scan the QR code on your certificate to access the Magdala Global Registry. Enter your serial number to see your exact 1 sq cm coordinate on a live satellite map of the Magdala site — your permanent, verifiable place in sacred ground.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ THE TRUST ══════ -->
+  <section id="trust" class="section">
+    <div class="container">
+      <div class="trust-grid">
+        <div class="trust-left reveal">
+          <p class="eyebrow">Governance & Charitable Mission</p>
+          <span class="gold-rule"></span>
+          <h2 class="display-lg">The Magdala Faithful Foundation</h2>
+          <p>Every Guardianship purchase is anchored to an independent non-profit Trust, governed by respected clergy, legal professionals, and community leaders. The Trust holds the spiritual custodianship of the land — not the commercial entity.</p>
+          <p>This structural separation ensures that charitable impact is protected from commercial liability, and that every Guardian's purchase contributes visibly to their community.</p>
+          <div class="trust-stat">
+            <div class="trust-stat-num">10%</div>
+            <div class="trust-stat-label">Of gross revenue from every sale is automatically routed to the Foundation at the point of transaction</div>
+          </div>
+          <div class="trust-stat">
+            <div class="trust-stat-num">99yr</div>
+            <div class="trust-stat-label">Custodianship term — the land is covenant-protected from commercial or residential development in perpetuity</div>
+          </div>
+        </div>
+        <div class="trust-right reveal">
+          <p class="eyebrow" style="color:var(--gold); margin-bottom:1rem;">Board of Trustees</p>
+          <div class="trustee-card">
+            <div class="trustee-icon">✝</div>
+            <div>
+              <div class="trustee-title">Chairperson — Senior Clergy</div>
+              <div class="trustee-desc">A retired Bishop providing moral authority and public spiritual accountability for the project's mission</div>
+            </div>
+          </div>
+          <div class="trustee-card">
+            <div class="trustee-icon">⚖</div>
+            <div>
+              <div class="trustee-title">Legal Trustee — Senior Advocate</div>
+              <div class="trustee-desc">A Senior Advocate of the High Court of Kenya ensuring compliance with the Custodianship Deed and land use covenants</div>
+            </div>
+          </div>
+          <div class="trustee-card">
+            <div class="trustee-icon">🤝</div>
+            <div>
+              <div class="trustee-title">Community Trustee — Philanthropy</div>
+              <div class="trustee-desc">A recognised leader in Kenyan philanthropy overseeing disbursement of Trust funds into water, education, and community projects</div>
+            </div>
+          </div>
+          <div class="trustee-card" style="margin-top:0.5rem; border-color:rgba(201,168,76,0.4);">
+            <div class="trustee-icon" style="background:var(--teal-mid);">📊</div>
+            <div>
+              <div class="trustee-title">Full Financial Transparency</div>
+              <div class="trustee-desc">Quarterly audited disbursement reports published publicly. The Trust holds no equity in the commercial entity.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ ACQUIRE ════════ -->
+  <section id="acquire" class="section">
+    <div class="container">
+      <div class="price-hero reveal">
+        <p class="eyebrow">Your Guardianship</p>
+        <div class="price-main">USD $25</div>
+        <div class="price-sub">KES 3,250</div>
+        <p>The price of a family meal. A lifetime bond to the most sacred ground in the Christian world.</p>
+      </div>
+
+      <div class="section-header reveal">
+        <p class="eyebrow">How to Acquire</p>
+        <span class="gold-rule centered"></span>
+        <h2 class="display-lg">Choose Your Path</h2>
+        <p>Guardianships are available through your church partner or directly online. Both channels are fully M-Pesa enabled.</p>
+      </div>
+
+      <div class="purchase-grid reveal">
+        <!-- Church channel -->
+        <div class="purchase-channel featured">
+          <div class="featured-badge">Recommended</div>
+          <div class="channel-icon">⛪</div>
+          <div class="channel-title">Through Your Church</div>
+          <p class="channel-desc">The primary channel — available at participating Mega-Churches, Dioceses, and Christian SACCOs across Kenya. Commissions support your church building fund directly.</p>
+          <ul class="channel-steps">
+            <li><div class="step-num">1</div>Visit a participating church partner</li>
+            <li><div class="step-num">2</div>Ask a Guardianship Ambassador for your registration</li>
+            <li><div class="step-num">3</div>Pay KES 3,250 via M-Pesa using your church's Distributor Code</li>
+            <li><div class="step-num">4</div>Receive your Certificate of Guardianship immediately</li>
+            <li><div class="step-num">5</div>Collect your crystal block at Redemption Sunday within 28 days</li>
+          </ul>
+          <div class="mpesa-badge">
+            <span style="font-size:1rem;">📱</span> M-Pesa Enabled
+          </div>
+          <a href="#faq" class="btn btn-teal" style="width:100%; justify-content:center; margin-top:0.5rem;">Find a Church Partner</a>
+        </div>
+
+        <!-- Online channel -->
+        <div class="purchase-channel">
+          <div class="channel-icon">🌐</div>
+          <div class="channel-title">Online Direct</div>
+          <p class="channel-desc">Purchase your Guardianship directly from this website. Your certificate will be emailed immediately and your crystal block dispatched within 28 days.</p>
+          <div class="online-form">
+            <div class="form-row">
+              <div class="form-field">
+                <label>First Name</label>
+                <input type="text" placeholder="Mary" />
+              </div>
+              <div class="form-field">
+                <label>Last Name</label>
+                <input type="text" placeholder="Wanjiru" />
+              </div>
+            </div>
+            <div class="form-field">
+              <label>Email Address</label>
+              <input type="email" placeholder="mary@example.com" />
+            </div>
+            <div class="form-field">
+              <label>M-Pesa Phone Number</label>
+              <input type="tel" placeholder="+254 7XX XXX XXX" />
+            </div>
+            <div class="form-field">
+              <label>Delivery Address</label>
+              <input type="text" placeholder="Street, City, County" />
+            </div>
+            <div class="mpesa-badge">
+              <span>📱</span> Payment via M-Pesa Daraja API
+            </div>
+            <button class="btn btn-gold" style="width:100%; justify-content:center;">
+              Proceed to Payment — KES 3,250
+            </button>
+            <p style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:0.3rem;">
+              You will receive an M-Pesa STK push to your phone to confirm payment
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ VERIFY ═════════ -->
+  <section id="verify">
+    <div class="container">
+      <div class="verify-header reveal">
+        <p class="eyebrow">Certificate Registry</p>
+        <span class="gold-rule centered" style="background:var(--gold); display:block; width:60px; height:2px; margin:1rem auto;"></span>
+        <h2 class="display-lg">Verify Your Guardianship</h2>
+        <p>Enter your serial number to view your exact coordinate on the Magdala land parcel, and to access a downloadable copy of your certificate.</p>
+      </div>
+
+      <div class="verify-box reveal">
+        <p style="font-size:0.78rem; color:var(--gold-light); margin-bottom:1rem; letter-spacing:0.05em;">
+          Your serial number appears on your Certificate of Guardianship — format: MIG-XXXXXXXX
+        </p>
+        <div class="serial-input-row">
+          <div class="serial-prefix">MIG-</div>
+          <input
+            type="text"
+            id="serial-input"
+            placeholder="00000000"
+            maxlength="8"
+            inputmode="numeric"
+            autocomplete="off"
+          />
+        </div>
+        <div id="serial-error"></div>
+        <button class="btn btn-gold" id="verify-btn" onclick="verifySerial()">
+          Verify My Guardianship
+        </button>
+
+        <!-- Result Panel -->
+        <div id="verify-result">
+          <div class="result-header">
+            <div class="result-header-icon">✓</div>
+            <div class="result-header-text">
+              <h4>Guardianship Verified</h4>
+              <p>This is an authenticated certificate from the Magdala Global Registry</p>
+            </div>
+          </div>
+          <div class="result-body">
+            <div class="result-grid" style="margin-bottom:1.5rem;">
+              <div>
+                <div class="result-detail-label">Serial Number</div>
+                <div class="result-detail-value" id="res-serial">—</div>
+              </div>
+              <div>
+                <div class="result-detail-label">Guardian Name</div>
+                <div class="result-detail-value" id="res-name">—</div>
+              </div>
+              <div>
+                <div class="result-detail-label">Issue Date</div>
+                <div class="result-detail-value" id="res-date">—</div>
+              </div>
+              <div>
+                <div class="result-detail-label">Plot Coordinates</div>
+                <div class="result-detail-value" id="res-coords">—</div>
+              </div>
+            </div>
+
+            <!-- Map -->
+            <div id="map-container">
+              <div id="guardianship-map"></div>
+              <div class="map-overlay" id="map-label">Magdala Heritage Site — Plot <span id="map-plot">—</span></div>
+            </div>
+
+            <div class="result-actions">
+              <button class="btn btn-teal" onclick="showCertificate()">View My Certificate</button>
+              <button class="btn btn-outline-teal" onclick="downloadCertificate()">Download PDF</button>
+            </div>
+
+            <!-- Certificate -->
+            <div id="certificate-preview">
+              <div class="certificate" id="cert-print">
+                <div class="cert-corner tl"></div>
+                <div class="cert-corner tr"></div>
+                <div class="cert-corner bl"></div>
+                <div class="cert-corner br"></div>
+                <div class="cert-eyebrow">The Migdal Heritage Project · Magdala Faithful Foundation</div>
+                <div class="cert-title">Certificate of Guardianship</div>
+                <div class="cert-subtitle">Symbolic Commemorative Custodianship</div>
+                <div class="cert-divider"></div>
+                <p class="cert-body">
+                  This certifies that <strong id="cert-name">—</strong> is the registered Guardian of a specific coordinate within the Magdala Heritage Site, Magdala, Israel — birthplace of Mary Magdalene — held in perpetual sacred custodianship by the Magdala Faithful Foundation.
+                </p>
+                <div class="cert-serial" id="cert-serial">MIG-00000000</div>
+                <div class="cert-coords" id="cert-coords">Coordinates: —</div>
+                <div class="cert-seal">M</div>
+                <div class="cert-divider"></div>
+                <div class="cert-footer">
+                  This certificate confers symbolic custodial rights only. No real estate title, ownership interest, or right of physical access is conveyed.<br>
+                  Issued under the authority of the Magdala Faithful Foundation, registered under the Trustees (Perpetual Succession) Act of Kenya.<br>
+                  Verify at <strong>migdalheritage.com/verify</strong>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ FAQ ═══════════ -->
+  <section id="faq" class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <p class="eyebrow">Questions &amp; Answers</p>
+        <span class="gold-rule centered"></span>
+        <h2 class="display-lg">Frequently Asked Questions</h2>
+      </div>
+      <div class="faq-list reveal">
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <h4>Do I own a piece of land in Israel?</h4>
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-a">
+            <p>No. A Guardianship is a Symbolic Commemorative Custodianship — not a property title or real estate transaction. You acquire a licensed custodial certificate linking you to a specific coordinate on the Magdala heritage site. No freehold or leasehold real estate title is transferred. The land itself is held by the Magdala Faithful Foundation in perpetual heritage custodianship.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <h4>What is my serial number and why does it matter?</h4>
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-a">
+            <p>Your serial number — in the format MIG-XXXXXXXX — is your unique, permanent identifier in the Magdala Global Registry. It links you specifically to a 1 sq cm coordinate within the heritage site and is laser-engraved on your crystal block. No two serial numbers are the same. You can verify your Guardianship at any time on this website by entering your serial number above.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <h4>Is this an investment? Can I sell my Guardianship?</h4>
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-a">
+            <p>No. A Guardianship carries no promise of financial return, capital appreciation, or resale market. It is a devotional and commemorative product, not a financial instrument. It is not regulated by the Capital Markets Authority of Kenya or any securities regulator. We explicitly advise against purchasing a Guardianship with any expectation of financial gain.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <h4>How does my purchase benefit the community?</h4>
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-a">
+            <p>10% of every purchase is automatically routed to the Magdala Faithful Foundation at the point of sale via the M-Pesa Daraja API — the commercial entity never handles this portion. The Foundation, governed by independent trustees including respected clergy and community leaders, disburses these funds to charitable projects including clean water, education, and community development. Disbursement reports are published quarterly.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <h4>How long does delivery take?</h4>
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-a">
+            <p>Your Certificate of Guardianship is issued immediately upon payment — either physically at the point of church sale, or by email if purchased online. Your Cornerstone Crystal Block is laser-engraved at our Nairobi facility and delivered within 28 days. Church purchasers receive their crystal block at a community Redemption Sunday event. Online purchasers receive theirs by secure courier.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <h4>Can I purchase a Guardianship as a gift?</h4>
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-a">
+            <p>Yes — and this is one of the most common uses. A Guardianship Kit makes a deeply meaningful gift for weddings, confirmations, baptisms, birthdays, and memorials. Gift purchases can be registered in the recipient's name. Contact us for gift certificate packaging options.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">
+            <h4>Which churches currently participate?</h4>
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-a">
+            <p>We are currently onboarding church partners across Kenya including Mega-denominations, Catholic Dioceses, Anglican Synods, and Christian SACCOs. Our launch programme prioritises Nairobi, Mombasa, Nakuru, Eldoret, and Kisumu. If your church or denomination would like to become a Guardianship Ambassador Institution, please contact us using the details below.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ CTA FINAL ══════ -->
+  <section id="cta-final">
+    <div class="container">
+      <h2 class="display-xl">"Rooted in Faith.<br><span>Connected to History.</span>"</h2>
+      <p class="body-md">Your place in Magdala awaits. Become a Guardian today — for the price of a family meal, hold a lifetime bond to the most sacred ground in the Christian world.</p>
+      <div class="cta-btns">
+        <a href="#acquire" class="btn btn-gold">Become a Guardian — USD $25</a>
+        <a href="#verify" class="btn btn-outline-white">Verify My Certificate</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ FOOTER ═════════ -->
+  <footer id="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+          <div class="nav-logo-mark">M</div>
+          <span style="font-family:var(--font-display); font-size:1rem; font-weight:600; color:rgba(255,255,255,0.7);">Migdal Heritage</span>
+        </div>
+        <p>The Migdal Heritage Project connects East Africa to their Abrahamic Biblical Heritage through a verifiable, serialised custodianship of sacred ground in Magdala, Israel.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Navigate</h5>
+        <ul>
+          <li><a href="#story">The Story</a></li>
+          <li><a href="#guardianship">Guardianship</a></li>
+          <li><a href="#trust">The Trust</a></li>
+          <li><a href="#acquire">Acquire</a></li>
+          <li><a href="#verify">Verify</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Legal</h5>
+        <ul>
+          <li><a href="#">Terms of Guardianship</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Custodianship Deed</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Trust Charter</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <ul>
+          <li><a href="mailto:info@migdalheritage.com">info@migdalheritage.com</a></li>
+          <li><a href="#">www.migdalheritage.com</a></li>
+          <li><a href="tel:+254700000000">+254 700 000 000</a></li>
+          <li><a href="#">Church Partnerships</a></li>
+          <li><a href="#">Investor Relations</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-legal">
+        <strong>Important Legal Notice:</strong> A Migdal Heritage Guardianship is a Symbolic Commemorative Custodianship only. It does not constitute, and shall not be construed as, a transfer of real estate title, a collective investment scheme, a financial instrument, or any form of security under applicable law. No ownership interest in land, no right of physical access, and no promise of financial return is conveyed or implied. The Migdal Heritage Project and Migdal Heritage Kenya Ltd are not regulated by the Capital Markets Authority of Kenya in connection with this product. The Magdala Faithful Foundation is a registered non-profit entity governed under the Trustees (Perpetual Succession) Act of Kenya. All commercial operations are subject to Kenyan law. © 2025 Migdal Heritage Kenya Ltd. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ── Nav scroll behaviour ──────────────────────────────────────────────────
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    });
+
+    // ── Mobile menu ───────────────────────────────────────────────────────────
+    document.getElementById('mobile-toggle').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('open');
+    });
+    function closeMobile() {
+      document.getElementById('mobile-menu').classList.remove('open');
+    }
+
+    // ── FAQ accordion ─────────────────────────────────────────────────────────
+    function toggleFaq(el) {
+      const item = el.parentElement;
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    }
+
+    // ── Scroll reveal ─────────────────────────────────────────────────────────
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+    // ── Serial number input — allow only digits ───────────────────────────────
+    document.getElementById('serial-input').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 8);
+      document.getElementById('serial-error').textContent = '';
+      this.classList.remove('error');
+    });
+
+    // ── Mock certificate data (POC — replace with real API call) ─────────────
+    function getMockData(serial) {
+      // Simulate a small set of demo certificates for POC purposes
+      const demos = {
+        '00000001': { name: 'Mary Wanjiku Kamau',   date: '12 January 2026', lat: 32.8387 + 0.0001, lng: 35.5068 + 0.0001 },
+        '00000002': { name: 'James Ochieng Oduya',  date: '15 January 2026', lat: 32.8387 + 0.0002, lng: 35.5068 + 0.0002 },
+        '00000003': { name: 'Grace Akinyi Otieno',  date: '18 January 2026', lat: 32.8387 + 0.0003, lng: 35.5068 + 0.0003 },
+        '00000042': { name: 'Samuel Mwangi Kariuki', date: '22 January 2026', lat: 32.8387 + 0.0004, lng: 35.5068 + 0.0004 },
+        '12345678': { name: 'Demo Guardian',         date: '01 February 2026', lat: 32.8387,           lng: 35.5068 },
+      };
+      // For any other 8-digit number, generate plausible mock data
+      if (demos[serial]) return demos[serial];
+      const seed = parseInt(serial);
+      return {
+        name: 'Registered Guardian',
+        date: '2026',
+        lat: 32.8387 + (seed % 100) * 0.000005,
+        lng: 35.5068 + (seed % 100) * 0.000005,
+      };
+    }
+
+    let mapInstance = null;
+    let mapMarker  = null;
+
+    // ── Verify serial ─────────────────────────────────────────────────────────
+    function verifySerial() {
+      const input = document.getElementById('serial-input');
+      const errEl = document.getElementById('serial-error');
+      const serial = input.value.trim();
+
+      if (serial.length !== 8) {
+        input.classList.add('error');
+        errEl.textContent = 'Please enter your full 8-digit serial number.';
+        return;
+      }
+      if (!/^\d{8}$/.test(serial)) {
+        input.classList.add('error');
+        errEl.textContent = 'Serial numbers contain digits only.';
+        return;
+      }
+
+      const btn = document.getElementById('verify-btn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying…';
+
+      // Simulate async lookup
+      setTimeout(() => {
+        const data = getMockData(serial);
+        const fullSerial = 'MIG-' + serial;
+        const coords = data.lat.toFixed(6) + '°N, ' + data.lng.toFixed(6) + '°E';
+
+        // Populate result fields
+        document.getElementById('res-serial').textContent = fullSerial;
+        document.getElementById('res-name').textContent   = data.name;
+        document.getElementById('res-date').textContent   = data.date;
+        document.getElementById('res-coords').textContent = coords;
+        document.getElementById('map-plot').textContent   = fullSerial;
+
+        // Certificate fields
+        document.getElementById('cert-name').textContent   = data.name;
+        document.getElementById('cert-serial').textContent = fullSerial;
+        document.getElementById('cert-coords').textContent = 'Coordinates: ' + coords;
+
+        // Show result
+        const resultEl = document.getElementById('verify-result');
+        resultEl.classList.add('visible');
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Init or update map
+        initMap(data.lat, data.lng, fullSerial);
+
+        btn.disabled = false;
+        btn.textContent = 'Verify My Guardianship';
+      }, 900);
+    }
+
+    function initMap(lat, lng, serial) {
+      // Magdala is at approx 32.8387°N, 35.5068°E
+      if (typeof L === 'undefined') {
+        document.getElementById('map-container').innerHTML =
+          '<div style="display:grid;place-items:center;height:100%;color:var(--teal-mid);font-size:0.85rem;">Map loading — please ensure internet connection</div>';
+        return;
+      }
+
+      if (mapInstance) {
+        mapMarker.setLatLng([lat, lng]);
+        mapInstance.setView([lat, lng], 17);
+        return;
+      }
+
+      mapInstance = L.map('guardianship-map', { zoomControl: true }).setView([lat, lng], 16);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 20,
+      }).addTo(mapInstance);
+
+      // Custom gold marker
+      const goldIcon = L.divIcon({
+        html: `<div style="width:20px;height:20px;background:#C9A84C;border:3px solid #0F3D33;border-radius:50%;box-shadow:0 0 0 3px rgba(201,168,76,0.3);"></div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
+        className: '',
+      });
+
+      mapMarker = L.marker([lat, lng], { icon: goldIcon })
+        .addTo(mapInstance)
+        .bindPopup(`<strong>${serial}</strong><br>${lat.toFixed(6)}°N, ${lng.toFixed(6)}°E`, {
+          className: 'custom-popup'
+        })
+        .openPopup();
+
+      // Add a subtle boundary rectangle around Magdala site
+      const bounds = [
+        [32.837, 35.505],
+        [32.840, 35.509],
+      ];
+      L.rectangle(bounds, {
+        color: '#C9A84C',
+        weight: 1.5,
+        fillColor: 'rgba(201,168,76,0.08)',
+        fillOpacity: 0.5,
+        dashArray: '6 4',
+      }).addTo(mapInstance).bindTooltip('Magdala Heritage Site', { permanent: false });
+    }
+
+    function showCertificate() {
+      const certEl = document.getElementById('certificate-preview');
+      certEl.classList.toggle('visible');
+      if (certEl.classList.contains('visible')) {
+        certEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function downloadCertificate() {
+      // POC: open print dialog targeted at the certificate div
+      // In production this would call a server-side PDF generation endpoint
+      const serial = document.getElementById('cert-serial').textContent;
+      const name   = document.getElementById('cert-name').textContent;
+
+      // Show certificate first if not visible
+      document.getElementById('certificate-preview').classList.add('visible');
+
+      // Small delay then print
+      setTimeout(() => {
+        const certContent = document.getElementById('cert-print').innerHTML;
+        const win = window.open('', '_blank', 'width=800,height=600');
+        win.document.write(`
+          <!DOCTYPE html><html><head>
+          <title>Certificate — ${serial}</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+          <style>
+            body { margin: 40px; background: #FAF6EE; font-family: 'Cormorant Garamond', Georgia, serif; }
+            .certificate { border: 2px solid #C9A84C; padding: 3rem; text-align: center; position: relative; max-width: 680px; margin: 0 auto; }
+            .cert-corner { position: absolute; width: 40px; height: 40px; border-color: #C9A84C; border-style: solid; }
+            .cert-corner.tl { top:12px; left:12px; border-width:2px 0 0 2px; }
+            .cert-corner.tr { top:12px; right:12px; border-width:2px 2px 0 0; }
+            .cert-corner.bl { bottom:12px; left:12px; border-width:0 0 2px 2px; }
+            .cert-corner.br { bottom:12px; right:12px; border-width:0 2px 2px 0; }
+            .cert-eyebrow { font-size:0.65rem; letter-spacing:0.25em; text-transform:uppercase; color:#C9A84C; font-family:'Jost',sans-serif; margin-bottom:1rem; }
+            .cert-title { font-size:2rem; font-weight:700; color:#0F3D33; margin-bottom:0.3rem; }
+            .cert-subtitle { font-size:1rem; font-style:italic; color:#2A7A69; margin-bottom:1.5rem; }
+            .cert-divider { width:120px; height:1px; background:#C9A84C; margin:1rem auto; }
+            .cert-body { font-size:1rem; color:#3A3A3A; line-height:1.7; max-width:480px; margin:0 auto 1.5rem; }
+            .cert-serial { display:inline-block; background:#0A2820; color:#E2C97E; font-family:'Jost',sans-serif; font-size:1.1rem; font-weight:700; letter-spacing:0.15em; padding:0.5rem 1.5rem; margin-bottom:1.5rem; }
+            .cert-coords { font-size:0.8rem; color:#6B6B6B; font-family:'Jost',sans-serif; letter-spacing:0.06em; margin-bottom:1.5rem; }
+            .cert-seal { width:70px; height:70px; background:#0F3D33; border-radius:50%; display:grid; place-items:center; margin:0 auto 1rem; font-size:1.4rem; font-weight:700; color:#C9A84C; border:3px solid #C9A84C; }
+            .cert-footer { font-size:0.7rem; color:#6B6B6B; font-family:'Jost',sans-serif; letter-spacing:0.05em; line-height:1.6; }
+            @media print { body { margin: 0; } }
+          </style></head><body>
+          <div class="certificate">${certContent}</div>
+          <script>window.onload=()=>window.print()<\/script>
+          </body></html>
+        `);
+        win.document.close();
+      }, 300);
+    }
+  </script>
+</body>
+</html>
